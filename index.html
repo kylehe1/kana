@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Kana Trainer</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0f0f0f;
+      color: #e0e0e0;
+      font-family: 'Georgia', serif;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      color: #c9a84c;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 40px;
+      font-size: 1rem;
+    }
+
+    h2 {
+      font-size: 1.2rem;
+      color: #c9a84c;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      margin-bottom: 28px;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .btn {
+      background: #1a1a1a;
+      color: #c9a84c;
+      border: 1px solid #c9a84c;
+      padding: 10px 18px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Georgia', serif;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+
+    .btn:hover { background: #2a2a2a; }
+
+    .btn.selected {
+      background: #c9a84c;
+      color: #0f0f0f;
+      font-weight: bold;
+    }
+
+    .btn.mode-btn {
+      font-size: 1rem;
+      padding: 12px 24px;
+    }
+
+    .start-btn {
+      background: #c9a84c;
+      color: #0f0f0f;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Georgia', serif;
+      font-size: 1.1rem;
+      font-weight: bold;
+      transition: background 0.2s;
+      margin-top: 10px;
+    }
+
+    .start-btn:hover { background: #e0c068; }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .flashcard {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .kana-char {
+      font-size: 8rem;
+      color: #e0e0e0;
+      line-height: 1;
+      margin-bottom: 20px;
+    }
+
+    .romaji-reveal {
+      font-size: 2rem;
+      color: #c9a84c;
+      min-height: 48px;
+    }
+
+    .nav-btns {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      margin-top: 10px;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: #888;
+      margin-top: 16px;
+    }
+
+    .quiz-card {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 60px 20px;
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .quiz-input {
+      background: #0f0f0f;
+      border: 1px solid #555;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-family: 'Georgia', serif;
+      font-size: 1.2rem;
+      padding: 12px 20px;
+      text-align: center;
+      width: 200px;
+      margin-top: 20px;
+      outline: none;
+    }
+
+    .quiz-input:focus { border-color: #c9a84c; }
+
+    .feedback {
+      font-size: 1.1rem;
+      min-height: 32px;
+      margin-top: 14px;
+    }
+
+    .feedback.correct { color: #4caf50; }
+    .feedback.wrong { color: #e57373; }
+
+    .quiz-progress {
+      color: #888;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .results-box {
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 12px;
+      padding: 40px;
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .score-big {
+      font-size: 3rem;
+      color: #c9a84c;
+      margin-bottom: 10px;
+    }
+
+    .missed-chars {
+      margin-top: 24px;
+      text-align: left;
+    }
+
+    .missed-chars h3 {
+      color: #e57373;
+      margin-bottom: 12px;
+    }
+
+    .missed-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .missed-item {
+      background: #2a1a1a;
+      border: 1px solid #e57373;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 1.2rem;
+    }
+
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .toggle-label {
+      color: #aaa;
+      font-size: 0.95rem;
+    }
+
+    .question-count-input {
+      background: #1a1a1a;
+      border: 1px solid #c9a84c;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-family: 'Georgia', serif;
+      font-size: 1rem;
+      padding: 10px 16px;
+      width: 120px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screen-home">
+    <h1>Kana Trainer</h1>
+    <p class="subtitle">Learn to recognize hiragana and katakana.</p>
+
+    <div class="section">
+      <h2>Script</h2>
+      <div class="btn-group">
+        <button class="btn selected" onclick="select('script', 'hiragana', this)">Hiragana</button>
+        <button class="btn" onclick="select('script', 'katakana', this)">Katakana</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Lines to Study</h2>
+      <div class="btn-group">
+        <button class="btn selected" onclick="toggleLine('a', this)">A (あ)</button>
+        <button class="btn" onclick="toggleLine('k', this)">K (か)</button>
+        <button class="btn" onclick="toggleLine('s', this)">S (さ)</button>
+        <button class="btn" onclick="toggleLine('t', this)">T (た)</button>
+        <button class="btn" onclick="toggleLine('n', this)">N (な)</button>
+        <button class="btn" onclick="toggleLine('h', this)">H (は)</button>
+        <button class="btn" onclick="toggleLine('m', this)">M (ま)</button>
+        <button class="btn" onclick="toggleLine('y', this)">Y (や)</button>
+        <button class="btn" onclick="toggleLine('r', this)">R (ら)</button>
+        <button class="btn" onclick="toggleLine('w', this)">W (わ)</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Options</h2>
+      <div class="toggle-row">
+        <button class="btn" id="btn-daku" onclick="toggleOption('daku')">+ Dakuten</button>
+        <span class="toggle-label">が ざ だ ば ぱ</span>
+      </div>
+      <div class="toggle-row">
+        <button class="btn" id="btn-yoon" onclick="toggleOption('yoon')">+ Yoon</button>
+        <span class="toggle-label">きゃ しゃ ちゃ...</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Mode</h2>
+      <div class="btn-group">
+        <button class="btn mode-btn selected" onclick="select('mode', 'study', this)">📖 Study</button>
+        <button class="btn mode-btn" onclick="select('mode', 'quiz', this)">✏️ Quiz</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Number of Questions</h2>
+      <input type="number" id="question-count" class="question-count-input"
+        value="10" min="1" max="100">
+    </div>
+
+    <button class="start-btn" onclick="startSession()">Start →</button>
+  </div>
+
+  <!-- STUDY SCREEN -->
+  <div class="screen" id="screen-study">
+    <h1>Study Mode</h1>
+    <div class="flashcard">
+      <div class="kana-char" id="study-char">あ</div>
+      <div class="romaji-reveal" id="study-romaji"></div>
+      <button class="btn" style="margin-top:16px" onclick="revealRomaji()">Reveal</button>
+    </div>
+    <div class="nav-btns">
+      <button class="btn" onclick="studyNav(-1)">← Prev</button>
+      <button class="btn" onclick="studyNav(1)">Next →</button>
+    </div>
+    <p class="progress-text" id="study-progress"></p>
+    <div class="nav-btns" style="margin-top:24px">
+      <button class="btn" onclick="goHome()">← Back to Menu</button>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="screen" id="screen-quiz">
+    <h1>Quiz Mode</h1>
+    <p class="quiz-progress" id="quiz-progress"></p>
+    <div class="quiz-card">
+      <div class="kana-char" id="quiz-char">あ</div>
+      <input class="quiz-input" id="quiz-input" type="text"
+        placeholder="romaji..." onkeydown="if(event.key==='Enter') submitAnswer()">
+      <div class="feedback" id="quiz-feedback"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="btn start-btn" onclick="submitAnswer()">Submit</button>
+    </div>
+    <div class="nav-btns" style="margin-top:16px">
+      <button class="btn" onclick="goHome()">← Quit</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screen-results">
+    <h1>Results</h1>
+    <div class="results-box">
+      <div class="score-big" id="results-score"></div>
+      <div id="results-pct"></div>
+      <div class="missed-chars" id="results-missed"></div>
+    </div>
+    <div class="nav-btns">
+      <button class="start-btn" onclick="goHome()">← Back to Menu</button>
+    </div>
+  </div>
+
+</div>
+<script>
+  const LINES = {
+    a: { h: ['あ','い','う','え','お'], k: ['ア','イ','ウ','エ','オ'], r: ['a','i','u','e','o'] },
+    k: { h: ['か','き','く','け','こ'], k: ['カ','キ','ク','ケ','コ'], r: ['ka','ki','ku','ke','ko'] },
+    s: { h: ['さ','し','す','せ','そ'], k: ['サ','シ','ス','セ','ソ'], r: ['sa','shi','su','se','so'] },
+    t: { h: ['た','ち','つ','て','と'], k: ['タ','チ','ツ','テ','ト'], r: ['ta','chi','tsu','te','to'] },
+    n: { h: ['な','に','ぬ','ね','の'], k: ['ナ','ニ','ヌ','ネ','ノ'], r: ['na','ni','nu','ne','no'] },
+    h: { h: ['は','ひ','ふ','へ','ほ'], k: ['ハ','ヒ','フ','ヘ','ホ'], r: ['ha','hi','fu','he','ho'] },
+    m: { h: ['ま','み','む','め','も'], k: ['マ','ミ','ム','メ','モ'], r: ['ma','mi','mu','me','mo'] },
+    y: { h: ['や','ゆ','よ'],           k: ['ヤ','ユ','ヨ'],           r: ['ya','yu','yo'] },
+    r: { h: ['ら','り','る','れ','ろ'], k: ['ラ','リ','ル','レ','ロ'], r: ['ra','ri','ru','re','ro'] },
+    w: { h: ['わ','を','ん'],           k: ['ワ','ヲ','ン'],           r: ['wa','wo','n'] },
+  };
+
+  const DAKU = {
+    h: ['が','ぎ','ぐ','げ','ご','ざ','じ','ず','ぜ','ぞ','だ','ぢ','づ','で','ど','ば','び','ぶ','べ','ぼ','ぱ','ぴ','ぷ','ぺ','ぽ'],
+    k: ['ガ','ギ','グ','ゲ','ゴ','ザ','ジ','ズ','ゼ','ゾ','ダ','ヂ','ヅ','デ','ド','バ','ビ','ブ','ベ','ボ','パ','ピ','プ','ペ','ポ'],
+    r: ['ga','gi','gu','ge','go','za','ji','zu','ze','zo','da','ji','zu','de','do','ba','bi','bu','be','bo','pa','pi','pu','pe','po'],
+    lines: ['k','k','k','k','k','s','s','s','s','s','t','t','t','t','t','h','h','h','h','h','h','h','h','h','h']
+  };
+
+  const YOON = {
+    h: ['きゃ','きゅ','きょ','ぎゃ','ぎゅ','ぎょ','しゃ','しゅ','しょ','じゃ','じゅ','じょ','ちゃ','ちゅ','ちょ','にゃ','にゅ','にょ','ひゃ','ひゅ','ひょ','びゃ','びゅ','びょ','ぴゃ','ぴゅ','ぴょ','みゃ','みゅ','みょ','りゃ','りゅ','りょ'],
+    k: ['キャ','キュ','キョ','ギャ','ギュ','ギョ','シャ','シュ','ショ','ジャ','ジュ','ジョ','チャ','チュ','チョ','ニャ','ニュ','ニョ','ヒャ','ヒュ','ヒョ','ビャ','ビュ','ビョ','ピャ','ピュ','ピョ','ミャ','ミュ','ミョ','リャ','リュ','リョ'],
+    r: ['kya','kyu','kyo','gya','gyu','gyo','sha','shu','sho','ja','ju','jo','cha','chu','cho','nya','nyu','nyo','hya','hyu','hyo','bya','byu','byo','pya','pyu','pyo','mya','myu','myo','rya','ryu','ryo'],
+    lines: ['k','k','k','k','k','k','s','s','s','s','s','s','t','t','t','n','n','n','h','h','h','h','h','h','h','h','h','m','m','m','r','r','r']
+  };
+
+  let settings = {
+    script: 'hiragana',
+    lines: ['a'],
+    daku: false,
+    yoon: false,
+    mode: 'study'
+  };
+
+  let pool = [];
+  let studyIdx = 0;
+  let quizIdx = 0;
+  let quizQueue = [];
+  let correct = 0;
+  let wrong = 0;
+  let missed = {};
+  let quizLocked = false;
+
+  function select(type, val, btn) {
+    settings[type] = val;
+    btn.closest('.btn-group').querySelectorAll('.btn')
+       .forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+  }
+
+  function toggleLine(line, btn) {
+    if (settings.lines.includes(line)) {
+      if (settings.lines.length === 1) return;
+      settings.lines = settings.lines.filter(l => l !== line);
+      btn.classList.remove('selected');
+    } else {
+      settings.lines.push(line);
+      btn.classList.add('selected');
+    }
+  }
+
+  function toggleOption(opt) {
+    settings[opt] = !settings[opt];
+    document.getElementById('btn-' + opt)
+            .classList.toggle('selected', settings[opt]);
+  }
+
+  function buildPool() {
+    pool = [];
+    const sc = settings.script === 'hiragana' ? 'h' : 'k';
+
+    for (const line of settings.lines) {
+      const chars = LINES[line][sc];
+      const rom   = LINES[line].r;
+      chars.forEach((c, i) => pool.push({ char: c, romaji: rom[i] }));
+    }
+
+    if (settings.daku) {
+      DAKU.h.forEach((_, i) => {
+        if (settings.lines.includes(DAKU.lines[i])) {
+          pool.push({ char: DAKU[sc][i], romaji: DAKU.r[i] });
+        }
+      });
+    }
+
+    if (settings.yoon) {
+      YOON.h.forEach((_, i) => {
+        if (settings.lines.includes(YOON.lines[i])) {
+          const isDakuYoon = ['gya','gyu','gyo','ja','ju','jo','bya','byu','byo','pya','pyu','pyo'].includes(YOON.r[i]);
+          if (!isDakuYoon || settings.daku) {
+            pool.push({ char: YOON[sc][i], romaji: YOON.r[i] });
+          }
+        }
+      });
+    }
+  }
+
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function goHome() { showScreen('screen-home'); }
+
+  function startSession() {
+    buildPool();
+    if (pool.length === 0) return alert('No characters selected!');
+
+    correct = 0; wrong = 0; missed = {};
+
+    if (settings.mode === 'study') {
+      studyIdx = 0;
+      renderStudy();
+      showScreen('screen-study');
+    } else {
+      const count = parseInt(document.getElementById('question-count').value) || 10;
+      const fullShuffle = shuffle([...pool]);
+      quizQueue = [];
+      for (let i = 0; i < count; i++) {
+        quizQueue.push(fullShuffle[i % fullShuffle.length]);
+      }
+      quizIdx = 0;
+      quizLocked = false;
+      renderQuiz();
+      showScreen('screen-quiz');
+    }
+  }
+
+  function renderStudy() {
+    const item = pool[studyIdx];
+    document.getElementById('study-char').textContent = item.char;
+    document.getElementById('study-romaji').textContent = '';
+    document.getElementById('study-progress').textContent =
+      `${studyIdx + 1} / ${pool.length}`;
+  }
+
+  function revealRomaji() {
+    document.getElementById('study-romaji').textContent =
+      pool[studyIdx].romaji;
+  }
+
+  function studyNav(dir) {
+    studyIdx = (studyIdx + dir + pool.length) % pool.length;
+    renderStudy();
+  }
+
+  function renderQuiz() {
+    if (quizIdx >= quizQueue.length) { showResults(); return; }
+    const item = quizQueue[quizIdx];
+    document.getElementById('quiz-char').textContent = item.char;
+    document.getElementById('quiz-input').value = '';
+    document.getElementById('quiz-feedback').textContent = '';
+    document.getElementById('quiz-feedback').className = 'feedback';
+    document.getElementById('quiz-progress').textContent =
+      `Question ${quizIdx + 1} of ${quizQueue.length}`;
+    document.getElementById('quiz-input').focus();
+  }
+
+  function submitAnswer() {
+    if (quizLocked) return;
+    const item = quizQueue[quizIdx];
+    const userAns = document.getElementById('quiz-input').value.trim().toLowerCase();
+    const fb = document.getElementById('quiz-feedback');
+
+    if (userAns === '') return;
+
+    quizLocked = true;
+
+    if (userAns === item.romaji) {
+      fb.textContent = '✓ Correct!';
+      fb.className = 'feedback correct';
+      correct++;
+      setTimeout(() => { quizIdx++; quizLocked = false; renderQuiz(); }, 700);
+    } else {
+      fb.textContent = `✗ It was: ${item.romaji}`;
+      fb.className = 'feedback wrong';
+      wrong++;
+      missed[item.char] = (missed[item.char] || 0) + 1;
+      setTimeout(() => { quizIdx++; quizLocked = false; renderQuiz(); }, 1200);
+    }
+  }
+
+  function showResults() {
+    const total = correct + wrong;
+    const pct = ((correct / total) * 100).toFixed(1);
+    document.getElementById('results-score').textContent = `${correct} / ${total}`;
+    document.getElementById('results-pct').textContent = `${pct}%`;
+
+    const missedEl = document.getElementById('results-missed');
+    const missedChars = Object.entries(missed);
+    if (missedChars.length === 0) {
+      missedEl.innerHTML = '<p style="color:#4caf50;margin-top:16px">Perfect score! 🎉</p>';
+    } else {
+      missedEl.innerHTML = `<h3>Review these:</h3><div class="missed-list">${
+        missedChars.map(([c, n]) =>
+          `<div class="missed-item">${c} <span style="color:#888;font-size:0.8rem">(×${n})</span></div>`
+        ).join('')
+      }</div>`;
+    }
+
+    showScreen('screen-results');
+  }
+
+  function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+</script>
+</body>
+</html>
