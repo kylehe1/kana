@@ -17,7 +17,7 @@ This app does one thing well: it teaches you to **recognize** kana characters. Y
 - **Custom question count** — set how many questions you want per session
 - **Mistake tracker** — results screen shows which characters you struggled with
 
-## Why I built this
+## Why this exists
 
 I was learning Japanese and found that existing apps either taught too much at once or didn't let me drill specific character groups. I originally built a command-line version in Python, then rebuilt it as a web app so anyone could use it.
 
@@ -33,7 +33,7 @@ No installation needed. Just open `index.html` in your browser.
 
 ## Tech Stack
 
-- HTML, CSS, JavaScript (single file, no dependencies)
+- HTML, CSS, JavaScript
 
 ## Background
 
