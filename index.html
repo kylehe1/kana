@@ -279,12 +279,12 @@
     <div class="section">
       <h2>Mode</h2>
       <div class="btn-group">
-        <button class="btn mode-btn selected" onclick="select('mode', 'study', this)">📖 Study</button>
-        <button class="btn mode-btn" onclick="select('mode', 'quiz', this)">✏️ Quiz</button>
+        <button class="btn mode-btn selected" onclick="select('mode', 'study', this); setCountVisible(false)">📖 Study</button>
+        <button class="btn mode-btn" onclick="select('mode', 'quiz', this); setCountVisible(true)">✏️ Quiz</button>
       </div>
     </div>
 
-    <div class="section">
+    <div class="section" id="section-count" style="display:none">
       <h2>Number of Questions</h2>
       <input type="number" id="question-count" class="question-count-input"
         value="10" min="1" max="100">
@@ -335,6 +335,7 @@
     <div class="results-box">
       <div class="score-big" id="results-score"></div>
       <div id="results-pct"></div>
+      <div id="results-time" style="color:#888;margin-top:10px;font-size:0.95rem"></div>
       <div class="missed-chars" id="results-missed"></div>
     </div>
     <div class="nav-btns">
@@ -387,6 +388,12 @@
   let wrong = 0;
   let missed = {};
   let quizLocked = false;
+  let quizStartTime = 0;
+  let quizEndTime = 0;
+
+  function setCountVisible(show) {
+    document.getElementById('section-count').style.display = show ? '' : 'none';
+  }
 
   function select(type, val, btn) {
     settings[type] = val;
@@ -468,6 +475,7 @@
       }
       quizIdx = 0;
       quizLocked = false;
+      quizStartTime = Date.now();
       renderQuiz();
       showScreen('screen-quiz');
     }
@@ -527,11 +535,24 @@
     }
   }
 
+  function formatTime(ms) {
+    const s = ms / 1000;
+    if (s < 60) return s.toFixed(1) + 's';
+    const m = Math.floor(s / 60);
+    return `${m}m ${(s % 60).toFixed(0)}s`;
+  }
+
   function showResults() {
+    quizEndTime = Date.now();
     const total = correct + wrong;
     const pct = ((correct / total) * 100).toFixed(1);
+    const elapsed = quizEndTime - quizStartTime;
+    const avgMs = total > 0 ? elapsed / total : 0;
+
     document.getElementById('results-score').textContent = `${correct} / ${total}`;
     document.getElementById('results-pct').textContent = `${pct}%`;
+    document.getElementById('results-time').textContent =
+      `Total time: ${formatTime(elapsed)}  ·  Avg per question: ${formatTime(avgMs)}`;
 
     const missedEl = document.getElementById('results-missed');
     const missedChars = Object.entries(missed);
